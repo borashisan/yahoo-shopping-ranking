@@ -15,4 +15,4 @@ Ranking.propTypes = {
 };
 Ranking.defaultProps = {
   categoryId: '1'
-}
+};
