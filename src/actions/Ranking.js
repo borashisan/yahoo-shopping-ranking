@@ -1,4 +1,4 @@
-import fetchJsonp from 'fetch-jsonp';
+import axios from 'axios';
 import qs from 'qs';
 
 const API_URL = 'https://shopping.yahooapis.jp/ShoppingWebService/V2/categoryRanking';
@@ -29,9 +29,9 @@ export const fetchRanking = categoryId => {
     });
 
     try {
-      const response = await fetchJsonp(`${API_URL}?${queryString}`);
-      const data = await response.json();
-      dispatch(receiveData(categoryId, null, data));
+      const response = await axios.get(`${API_URL}?${queryString}`);
+      console.log(response);
+      dispatch(receiveData(categoryId, null, response));
     } catch (err) {
       dispatch(receiveData(categoryId, err));
     }
