@@ -1,27 +1,35 @@
 import axios from 'axios';
 import qs from 'qs';
+import { replace } from 'connected-react-router';
 
 const API_URL = 'https://shopping.yahooapis.jp/ShoppingWebService/V2/categoryRanking';
 const APP_ID = 'dj00aiZpPUZ4ekVUOFVDY3d1WiZzPWNvbnN1bWVyc2VjcmV0Jng9M2I-';
 
-const startRequest = categoryId => ({
-  type: 'STARTREQUEST',
-  payload: { categoryId },
+const startRequest = category => ({
+  type: 'START_REQUEST',
+  payload: { category },
 });
 
-const receiveData = (categoryId, error, response) => ({
+const receiveData = (category, error, response) => ({
   type: 'RECEIVE_DATA',
-  payload: { categoryId, error, response },
+  payload: { category, error, response },
 });
 
-const finishRequest = categoryId => ({
+const finishRequest = category => ({
   type: 'FINISH_REQUEST',
-  payload: {categoryId},
+  payload: {category},
 });
 
 export const fetchRanking = categoryId => {
-  return async dispatch => {
-    dispatch(startRequest(categoryId));
+  return async (dispatch, getState) => {
+    const categories = getState().shopping.categories;
+    const category = categories.find(category => (category.id === categoryId));
+    if (typeof category === 'undefined') {
+      dispatch(replace('/'));
+      return
+    }
+
+    dispatch(startRequest(category));
 
     const queryString = qs.stringify({
       appid: APP_ID,
@@ -30,11 +38,11 @@ export const fetchRanking = categoryId => {
 
     try {
       const response = await axios.get(`${API_URL}?${queryString}`);
-      console.log(response);
-      dispatch(receiveData(categoryId, null, response));
+      const data = await response.data
+      dispatch(receiveData(category, null, data));
     } catch (err) {
-      dispatch(receiveData(categoryId, err));
+      dispatch(receiveData(category, err));
     }
-    dispatch(finishRequest(categoryId));
+    dispatch(finishRequest(category));
   };
 };
